@@ -1,0 +1,35 @@
+#!/bin/bash -v
+sudo yum update -y
+sudo yum install httpd -y
+sudo yum install php -y
+sudo yum install python3-pip -y
+sudo pip3 install awscli
+sudo yum install mysql -y
+
+sudo yum install -y @php
+sudo yum install -y php php-{cli,mysqlnd,json,opcache,xml,mbstring,gd,curl}
+sudo systemctl enable --now php-fpm
+
+sudo yum -y install @httpd
+sudo systemctl enable --now httpd
+
+sudo yum -y install wget
+DRUPAL_VERSION="8.7.1"
+wget https://ftp.drupal.org/files/projects/drupal-${DRUPAL_VERSION}.tar.gz
+tar xvf drupal-${DRUPAL_VERSION}.tar.gz
+
+sudo mv drupal-${DRUPAL_VERSION} /var/www/html/drupal
+
+sudo cp /var/www/html/drupal/sites/default/default.settings.php /var/www/html/drupal/sites/default/settings.php
+
+sudo semanage fcontext -a -t httpd_sys_rw_content_t "/var/www/html/drupal(/.*)?"
+sudo semanage fcontext -a -t httpd_sys_rw_content_t '/var/www/html/drupal/sites/default/settings.php'
+sudo semanage fcontext -a -t httpd_sys_rw_content_t '/var/www/html/drupal/sites/default/files'
+sudo restorecon -Rv /var/www/html/drupal
+sudo restorecon -v /var/www/html/drupal/sites/default/settings.php
+sudo restorecon -Rv /var/www/html/drupal/sites/default/files
+sudo chown -R apache:apache  /var/www/html/drupal
+
+sudo setsebool httpd_can_network_connect_db on
+
+sudo systemctl restart httpd
