@@ -1,7 +1,5 @@
 #!/bin/bash -v
 sudo yum update -y
-sudo yum install httpd -y
-sudo yum install php -y
 sudo yum install python3-pip -y
 sudo pip3 install awscli
 sudo yum install mysql -y
